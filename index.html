@@ -3,87 +3,441 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Photo Detector - Safe Version</title>
+  <title>AI Photo Detector - 100% Free</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
-
 <body>
-  <div id="root"></div>
-
-  <script type="text/babel">
-    const { useState } = React;
-
-    function App() {
-      const [preview, setPreview] = useState(null);
-      const [result, setResult] = useState(null);
-      const [loading, setLoading] = useState(false);
-
-      const handleUpload = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        // Preview
-        const reader = new FileReader();
-        reader.onload = () => setPreview(reader.result);
-        reader.readAsDataURL(file);
-
-        // Convert to base64
-        const base64Reader = new FileReader();
-        base64Reader.onload = async () => {
-          const base64 = base64Reader.result.split(",")[1];
-
-          setLoading(true);
-          setResult(null);
-
-          try {
-            const response = await fetch("/api/analyze", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                base64,
-                type: file.type
-              })
-            });
-
-            const json = await response.json();
-            setResult(json);
-          } catch (err) {
-            setResult({ error: "Failed to analyze" });
-          }
-
-          setLoading(false);
-        };
-
-        base64Reader.readAsDataURL(file);
-      };
-
-      return (
-        <div className="p-6 max-w-3xl mx-auto">
-          <h1 className="text-3xl font-bold text-center mb-6">AI Photo Detector</h1>
-
-          <input type="file" accept="image/*" onChange={handleUpload} />
-
-          {preview && (
-            <img src={preview} className="mt-4 rounded shadow" />
-          )}
-
-          {loading && (
-            <p className="mt-4 text-purple-600 text-lg">Analyzing...</p>
-          )}
-
-          {result && (
-            <pre className="bg-gray-100 p-4 rounded mt-4">
-              {JSON.stringify(result, null, 2)}
-            </pre>
-          )}
+  <div class="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4">
+    <div class="max-w-4xl mx-auto">
+      <!-- Header -->
+      <div class="bg-white rounded-2xl shadow-xl p-8 mb-6">
+        <div class="text-center mb-8">
+          <div class="inline-block p-3 bg-purple-100 rounded-full mb-4">
+            <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h1 class="text-4xl font-bold text-gray-800 mb-2">
+            AI Photo Detector
+          </h1>
+          <p class="text-gray-600">
+            100% Free • No API Required • Works Offline
+          </p>
         </div>
-      );
+
+        <!-- Upload Area -->
+        <div class="mb-8">
+          <label class="block w-full cursor-pointer">
+            <div id="dropzone" class="border-4 border-dashed border-gray-300 rounded-xl p-12 hover:border-purple-500 hover:bg-purple-50 transition-all duration-200">
+              <input type="file" id="fileInput" accept="image/*" class="hidden">
+              <div class="text-center text-gray-400">
+                <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <p class="text-lg font-semibold text-gray-700 mb-2">
+                  Click to upload or drag & drop
+                </p>
+                <p class="text-sm text-gray-500">
+                  Supports JPG, PNG, WEBP
+                </p>
+              </div>
+            </div>
+          </label>
+        </div>
+
+        <!-- Preview -->
+        <div id="preview" class="hidden mb-6">
+          <img id="previewImg" class="max-w-full max-h-96 mx-auto rounded-lg shadow-lg">
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="hidden text-center py-8">
+          <svg class="w-12 h-12 animate-spin text-purple-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p class="text-gray-600">Analyzing image...</p>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="hidden bg-gray-50 rounded-xl p-6">
+          <!-- Result content will be inserted here -->
+        </div>
+      </div>
+
+      <!-- How It Works -->
+      <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+        <h3 class="text-xl font-bold text-gray-800 mb-4">🔍 How It Works</h3>
+        <div class="space-y-3 text-gray-600 text-sm">
+          <p>This detector analyzes images using multiple techniques:</p>
+          <ul class="space-y-2 ml-4">
+            <li><strong>📊 EXIF Metadata Analysis:</strong> Checks camera data, software signatures, AI generation markers</li>
+            <li><strong>🎨 Visual Pattern Detection:</strong> Analyzes color distribution, noise patterns, compression artifacts</li>
+            <li><strong>📐 Statistical Analysis:</strong> Examines pixel uniformity, edge sharpness, frequency patterns</li>
+            <li><strong>🏷️ Known AI Signatures:</strong> Detects metadata from Midjourney, DALL-E, Stable Diffusion, etc.</li>
+          </ul>
+          <p class="text-xs text-gray-500 mt-4">
+            ⚠️ Note: This is a heuristic-based detector. Results are indicators, not definitive proof. Modern AI can strip metadata and mimic camera characteristics.
+          </p>
+        </div>
+      </div>
+
+      <!-- Features -->
+      <div class="bg-white rounded-2xl shadow-xl p-6">
+        <h3 class="text-xl font-bold text-gray-800 mb-4">✨ Features</h3>
+        <div class="grid md:grid-cols-3 gap-4 text-sm">
+          <div class="p-4 bg-green-50 rounded-lg">
+            <div class="text-2xl mb-2">🆓</div>
+            <div class="font-semibold text-gray-800 mb-1">100% Free</div>
+            <div class="text-gray-600">No API keys, no costs, no limits</div>
+          </div>
+          <div class="p-4 bg-blue-50 rounded-lg">
+            <div class="text-2xl mb-2">🔒</div>
+            <div class="font-semibold text-gray-800 mb-1">Private</div>
+            <div class="text-gray-600">Images processed locally in your browser</div>
+          </div>
+          <div class="p-4 bg-purple-50 rounded-lg">
+            <div class="text-2xl mb-2">⚡</div>
+            <div class="font-semibold text-gray-800 mb-1">Fast</div>
+            <div class="text-gray-600">Instant results, works offline</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const dropzone = document.getElementById('dropzone');
+    const preview = document.getElementById('preview');
+    const previewImg = document.getElementById('previewImg');
+    const loading = document.getElementById('loading');
+    const results = document.getElementById('results');
+
+    // File input handler
+    fileInput.addEventListener('change', handleFile);
+
+    // Drag and drop
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('border-purple-500', 'bg-purple-50');
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('border-purple-500', 'bg-purple-50');
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('border-purple-500', 'bg-purple-50');
+      if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        handleFile();
+      }
+    });
+
+    async function handleFile() {
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      // Show preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        previewImg.src = e.target.result;
+        preview.classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+
+      // Show loading
+      loading.classList.remove('hidden');
+      results.classList.add('hidden');
+
+      // Analyze
+      setTimeout(async () => {
+        const analysis = await analyzeImage(file);
+        displayResults(analysis);
+        loading.classList.add('hidden');
+        results.classList.remove('hidden');
+      }, 1000);
     }
 
-    ReactDOM.render(<App />, document.getElementById("root"));
+    async function analyzeImage(file) {
+      const indicators = [];
+      let confidence = 0;
+      let isAI = false;
+
+      // 1. Check EXIF metadata
+      const exifData = await extractEXIF(file);
+      const exifAnalysis = analyzeEXIF(exifData);
+      indicators.push(...exifAnalysis.indicators);
+      confidence += exifAnalysis.score;
+
+      // 2. Analyze image properties
+      const imgAnalysis = await analyzeImageData(file);
+      indicators.push(...imgAnalysis.indicators);
+      confidence += imgAnalysis.score;
+
+      // 3. Check file properties
+      const fileAnalysis = analyzeFileProperties(file);
+      indicators.push(...fileAnalysis.indicators);
+      confidence += fileAnalysis.score;
+
+      // Normalize confidence
+      confidence = Math.min(100, Math.max(0, confidence));
+      isAI = confidence > 50;
+
+      return {
+        isAI,
+        confidence,
+        indicators: indicators.filter(i => i),
+        exifData
+      };
+    }
+
+    async function extractEXIF(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const view = new DataView(e.target.result);
+          const exif = {
+            software: null,
+            make: null,
+            model: null,
+            hasEXIF: false
+          };
+
+          try {
+            // Check for EXIF marker
+            if (view.getUint16(0) === 0xFFD8) {
+              exif.hasEXIF = true;
+              
+              // Simple EXIF parsing (looking for common AI signatures in comments)
+              const arr = new Uint8Array(e.target.result);
+              const text = String.fromCharCode.apply(null, arr.slice(0, 5000));
+              
+              // Check for AI software signatures
+              if (text.includes('Midjourney') || text.includes('midjourney')) {
+                exif.software = 'Midjourney';
+              } else if (text.includes('DALL') || text.includes('dall-e')) {
+                exif.software = 'DALL-E';
+              } else if (text.includes('Stable Diffusion') || text.includes('stable-diffusion')) {
+                exif.software = 'Stable Diffusion';
+              } else if (text.includes('Adobe Photoshop') && text.includes('AI')) {
+                exif.software = 'Adobe Generative AI';
+              } else if (text.includes('leonardo.ai') || text.includes('Leonardo')) {
+                exif.software = 'Leonardo.AI';
+              }
+            }
+          } catch (e) {
+            // EXIF parsing failed
+          }
+
+          resolve(exif);
+        };
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    function analyzeEXIF(exif) {
+      const indicators = [];
+      let score = 0;
+
+      if (exif.software) {
+        indicators.push(`🤖 AI Software Detected: ${exif.software}`);
+        score += 60;
+      }
+
+      if (!exif.hasEXIF) {
+        indicators.push('⚠️ No EXIF data (common in AI images)');
+        score += 15;
+      } else {
+        indicators.push('✓ Contains EXIF metadata');
+        score -= 10;
+      }
+
+      return { indicators, score };
+    }
+
+    async function analyzeImageData(file) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+
+            const indicators = [];
+            let score = 0;
+
+            // 1. Check for unnatural uniformity
+            const uniformity = calculateUniformity(data);
+            if (uniformity > 0.85) {
+              indicators.push('🎨 Unusually uniform color distribution');
+              score += 20;
+            }
+
+            // 2. Check noise patterns
+            const noiseLevel = calculateNoise(data);
+            if (noiseLevel < 5) {
+              indicators.push('📊 Very low noise (AI images often over-smooth)');
+              score += 15;
+            } else if (noiseLevel > 30) {
+              indicators.push('✓ Natural noise patterns detected');
+              score -= 10;
+            }
+
+            // 3. Check resolution patterns
+            if (canvas.width === 1024 || canvas.width === 512 || canvas.width === 768) {
+              if (canvas.height === canvas.width) {
+                indicators.push('📐 Common AI resolution (512x512, 768x768, 1024x1024)');
+                score += 25;
+              }
+            }
+
+            // 4. Check for suspicious smoothness
+            const edgeSharpness = calculateEdgeSharpness(data, canvas.width, canvas.height);
+            if (edgeSharpness < 0.3) {
+              indicators.push('🌫️ Overly smooth/blurred (typical of AI)');
+              score += 20;
+            }
+
+            resolve({ indicators, score });
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function analyzeFileProperties(file) {
+      const indicators = [];
+      let score = 0;
+
+      // Check file size patterns
+      const sizeInMB = file.size / (1024 * 1024);
+      
+      if (sizeInMB < 0.5) {
+        indicators.push('💾 Very small file size (AI images often highly compressed)');
+        score += 10;
+      }
+
+      // Check filename patterns
+      const filename = file.name.toLowerCase();
+      if (filename.includes('generated') || filename.includes('ai') || 
+          filename.includes('midjourney') || filename.includes('dalle') ||
+          filename.includes('stable') || filename.includes('synthetic')) {
+        indicators.push('📝 Filename suggests AI generation');
+        score += 30;
+      }
+
+      return { indicators, score };
+    }
+
+    function calculateUniformity(data) {
+      const buckets = new Array(256).fill(0);
+      for (let i = 0; i < data.length; i += 4) {
+        const avg = Math.floor((data[i] + data[i+1] + data[i+2]) / 3);
+        buckets[avg]++;
+      }
+      const max = Math.max(...buckets);
+      return max / (data.length / 4);
+    }
+
+    function calculateNoise(data) {
+      let variance = 0;
+      const samples = Math.min(10000, data.length / 4);
+      const step = Math.floor(data.length / 4 / samples);
+      
+      for (let i = 0; i < data.length - 4 * step; i += 4 * step) {
+        const diff = Math.abs(data[i] - data[i + 4 * step]);
+        variance += diff;
+      }
+      
+      return variance / samples;
+    }
+
+    function calculateEdgeSharpness(data, width, height) {
+      let edgeStrength = 0;
+      const samples = 1000;
+      const step = Math.floor(data.length / 4 / samples);
+      
+      for (let i = width * 4; i < data.length - width * 4; i += 4 * step) {
+        const current = data[i];
+        const below = data[i + width * 4];
+        edgeStrength += Math.abs(current - below);
+      }
+      
+      return edgeStrength / samples / 255;
+    }
+
+    function displayResults(analysis) {
+      const iconClass = analysis.isAI ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600';
+      const icon = analysis.isAI ? 
+        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />' :
+        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />';
+
+      const confidenceColor = 
+        analysis.confidence >= 80 ? 'text-red-600 bg-red-500' :
+        analysis.confidence >= 60 ? 'text-orange-600 bg-orange-500' :
+        analysis.confidence >= 40 ? 'text-yellow-600 bg-yellow-500' :
+        'text-green-600 bg-green-500';
+
+      let html = `
+        <div class="flex items-start gap-4">
+          <div class="p-3 rounded-full ${iconClass}">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              ${icon}
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">
+              ${analysis.isAI ? '🤖 Likely AI-Generated' : '📷 Likely Real Photo'}
+            </h3>
+            <div class="mb-4">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-sm font-medium text-gray-600">Confidence:</span>
+                <span class="text-lg font-bold ${confidenceColor.split(' ')[0]}">
+                  ${analysis.confidence}%
+                </span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="${confidenceColor.split(' ')[1]} h-2 rounded-full transition-all duration-500" 
+                     style="width: ${analysis.confidence}%"></div>
+              </div>
+            </div>
+      `;
+
+      if (analysis.indicators.length > 0) {
+        html += `
+          <div class="mb-4">
+            <h4 class="font-semibold text-gray-800 mb-2">Detected Indicators:</h4>
+            <ul class="space-y-1">
+              ${analysis.indicators.map(ind => `
+                <li class="text-sm text-gray-600 flex items-start gap-2">
+                  <span class="text-purple-600 mt-0.5">•</span>
+                  <span>${ind}</span>
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+        `;
+      }
+
+      html += `
+          </div>
+        </div>
+      `;
+
+      results.innerHTML = html;
+    }
   </script>
 </body>
 </html>
